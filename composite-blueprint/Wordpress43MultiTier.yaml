@@ -1,0 +1,271 @@
+id: Wordpress43MultiTier
+name: Wordpress 4.3 Multi-Tier
+description: Multi-Tier Wordpress app with NAT Using NSX
+status: PUBLISHED
+properties:
+  __nsx.management_endpoint_name:
+    fixed: vCenter
+    secured: false
+    visible: false
+  __nsx.transport_zone_name:
+    fixed: Global_Transport_Zone
+    secured: false
+    visible: false
+components:
+  Apache_Services_1:
+    type: Software.ApacheServices
+    data:
+      host: ${_resource~wp-web-server}
+  External192168110:
+    type: Infrastructure.Network.Network.Existing
+    data:
+      name:
+        fixed: External192168110
+      network_profile:
+        fixed: External/192.168.110
+  MySQL_1:
+    type: Software.MySQL
+    data:
+      dbpassword: {}
+      host: ${_resource~wp-db-server}
+  NSXDBTier:
+    type: Infrastructure.Network.Network.NSX.OnDemand.NAT
+    data:
+      dns:
+        fixed:
+          dns_search_suffix: corp.local
+          dns_suffix: corp.local
+          primary_dns: 192.168.110.10
+      gateway:
+        fixed: 10.10.11.1
+      ip_ranges:
+        fixed:
+        - description: ''
+          end_ip: 10.10.11.200
+          id: dc2fdc1b-b644-496b-93a4-65e4b07775e6
+          name: DB IP Range
+          start_ip: 10.10.11.100
+      name:
+        fixed: NSXDBTier
+      parent_network_profile:
+        fixed: NSXDBTier
+      subnet_mask:
+        fixed: 255.255.255.0
+  NSXWebTier:
+    type: Infrastructure.Network.Network.NSX.OnDemand.NAT
+    data:
+      dns:
+        fixed:
+          dns_search_suffix: corp.local
+          dns_suffix: corp.local
+          primary_dns: 192.168.110.10
+      gateway:
+        fixed: 10.10.10.1
+      ip_ranges:
+        fixed:
+        - description: ''
+          end_ip: 10.10.10.200
+          id: 549d5dd3-07b1-4aa8-9270-f42ce312182c
+          name: Web IP Range
+          start_ip: 10.10.10.100
+      name:
+        fixed: NSXWebTier
+      parent_network_profile:
+        fixed: NSXWebTier
+      subnet_mask:
+        fixed: 255.255.255.0
+  PHP_Service_1:
+    type: Software.PHPService
+    dependsOn:
+    - Apache_Services_1
+    data:
+      host: ${_resource~wp-web-server}
+  System_Configuration_1:
+    type: Software.SystemConfiguration
+    data:
+      host: ${_resource~wp-web-server}
+  System_Configuration_2:
+    type: Software.SystemConfiguration
+    data:
+      host: ${_resource~wp-db-server}
+  Wordpress_Database_1:
+    type: Software.WordpressDatabase
+    data:
+      dbpassword: {}
+      dbuser: root
+      host: ${_resource~MySQL_1}
+  Wordpress_Services_1:
+    type: Software.WordpressServices
+    dependsOn:
+    - Wordpress_Database_1
+    data:
+      WP_DB_HOST:
+        editable: true
+        fixed: ${_resource~wp-db-server~ip_address}
+        secured: false
+      WP_DB_NAME: wordpress
+      WP_DB_PASSWORD: gogo123
+      WP_DB_USER: wordpressuser
+      host: ${_resource~Apache_Services_1}
+  wp-db-server:
+    type: Infrastructure.CatalogItem.Machine.Virtual.vSphere
+    data:
+      _cluster:
+        fixed: 1
+        min: 1
+      action:
+        fixed: LinkedClone
+      allow_storage_policies:
+        fixed: false
+      blueprint_type:
+        fixed: '1'
+      cpu:
+        fixed: 1
+        min: 1
+      disks:
+      - capacity: 3
+        custom_properties: null
+        id: 1449245543868
+        initial_location: ''
+        is_clone: true
+        label: Hard disk 1
+        storage_reservation_policy: ''
+        userCreated: false
+        volumeId: 0
+      display_location:
+        fixed: false
+      guest_customization_specification: CentOS
+      machine_prefix:
+        fixed:
+          id: Use group default
+      max_network_adapters: {}
+      max_volumes: {}
+      memory:
+        fixed: 512
+        min: 512
+      nics:
+      - address: ''
+        assignment_type: Static
+        id: 0
+        load_balancing: ''
+        network: ${_resource~NSXDBTier}
+        network_profile: NSXDBTier
+      provisioning_workflow:
+        fixed:
+          id: CloneWorkflow
+          label: CloneWorkflow
+      security_groups: []
+      security_tags: []
+      source_machine:
+        fixed:
+          id: 93f30417-e149-461f-afa6-c648ef49018f
+          label: linux-base-01a
+      source_machine_external_snapshot:
+        fixed: 4
+      source_machine_name:
+        fixed: linux-base-01a
+      source_machine_vmsnapshot:
+        fixed:
+          id: '4'
+      storage:
+        fixed: 3
+        min: 3
+  wp-loadbalancer:
+    type: Infrastructure.Network.LoadBalancer.NSX.OnDemand
+    data:
+      name:
+        fixed: wp-loadbalancer
+      services:
+        fixed:
+        - health_check_interval: 5
+          health_threshold: 5
+          id: HTTP
+          name: HTTP
+          port: 80
+          response_timeout: 5
+          service_URI: ''
+          unhealth_threshold: 10
+      tier:
+        fixed: ${_resource~wp-web-server}
+      tier_nic_index:
+        fixed: 0
+      vip_network:
+        fixed: ${_resource~External192168110}
+  wp-web-server:
+    type: Infrastructure.CatalogItem.Machine.Virtual.vSphere
+    data:
+      _cluster:
+        default: 2
+        max: 3
+        min: 2
+      action:
+        fixed: LinkedClone
+      allow_storage_policies:
+        fixed: false
+      blueprint_type:
+        fixed: '1'
+      cpu:
+        fixed: 1
+        min: 1
+      disks:
+      - capacity: 3
+        custom_properties: null
+        id: 1449245531912
+        initial_location: ''
+        is_clone: true
+        label: Hard disk 1
+        storage_reservation_policy: ''
+        userCreated: false
+        volumeId: 0
+      display_location:
+        fixed: false
+      guest_customization_specification: CentOS
+      machine_prefix:
+        fixed:
+          id: Use group default
+      max_network_adapters: {}
+      max_volumes: {}
+      memory:
+        fixed: 512
+        min: 512
+      nics:
+      - address: ''
+        assignment_type: Static
+        id: 0
+        load_balancing: HTTP
+        network: ${_resource~NSXWebTier}
+        network_profile: NSXWebTier
+      provisioning_workflow:
+        fixed:
+          id: CloneWorkflow
+          label: CloneWorkflow
+      security_groups: []
+      security_tags: []
+      source_machine:
+        fixed:
+          id: 93f30417-e149-461f-afa6-c648ef49018f
+          label: linux-base-01a
+      source_machine_external_snapshot:
+        fixed: 4
+      source_machine_name:
+        fixed: linux-base-01a
+      source_machine_vmsnapshot:
+        fixed:
+          id: '4'
+      storage:
+        fixed: 3
+        min: 3
+layout:
+  Apache_Services_1: 1,0
+  External192168110: 3,0
+  MySQL_1: 1,0
+  NSXDBTier: 1,0
+  NSXWebTier: 0,0
+  PHP_Service_1: 2,0
+  System_Configuration_1: 0,0
+  System_Configuration_2: 0,0
+  Wordpress_Database_1: 0,0
+  Wordpress_Services_1: 0,0
+  wp-db-server: 2,2
+  wp-loadbalancer: 2,0
+  wp-web-server: 2,1

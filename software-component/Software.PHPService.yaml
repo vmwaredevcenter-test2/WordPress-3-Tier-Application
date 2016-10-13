@@ -1,0 +1,53 @@
+'@type': "SoftwareComponentType"
+createdDate: "2015-12-04T15:22:31.074Z"
+lastUpdated: "2015-12-04T15:22:31.236Z"
+id: "Software.PHPService"
+name: "PHP Service"
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "host"
+    label: ""
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.iaas.blueprint.service"
+      classId: "Infrastructure.Machine.Schema"
+      label: "Machine"
+    state:
+      dependencies: []
+      facets:
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2015-12-04T15:22:31.075Z"
+  lastUpdated: "2015-12-04T15:22:31.075Z"
+  script:
+    scriptContent: "#!/bin/bash\n/usr/bin/yum install php php-mysql mysql-client -y"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"
+- createdDate: "2015-12-04T15:22:31.076Z"
+  lastUpdated: "2015-12-04T15:22:31.076Z"
+  script:
+    scriptContent: "#!/bin/bash\n/sbin/service httpd restart"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "START"
+    label: "Start"

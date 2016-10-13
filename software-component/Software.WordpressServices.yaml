@@ -1,0 +1,142 @@
+'@type': "SoftwareComponentType"
+createdDate: "2015-12-04T15:22:30.740Z"
+lastUpdated: "2015-12-04T21:19:19.790Z"
+id: "Software.WordpressServices"
+name: "Wordpress Services"
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "WP_DB_USER"
+    label: "WP_DB_USER"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "string"
+            value: "wordpressuser"
+    isMultiValued: false
+  - id: "WP_DB_PASSWORD"
+    label: "WP_DB_PASSWORD"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "secureString"
+            value: "gogo123"
+      - type: "encrypted"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+    isMultiValued: false
+  - id: "host"
+    label: ""
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.component.software.service"
+      classId: "softwareResourceType"
+      typeFilter: "Software.ApacheServices"
+      label: "Apache Services"
+    state:
+      dependencies: []
+      facets:
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+  - id: "WP_DB_NAME"
+    label: "WP_DB_NAME"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "string"
+            value: "wordpress"
+    isMultiValued: false
+  - id: "WP_DB_HOST"
+    label: "WP_DB_HOST"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "string"
+            value: "localhost"
+      - type: "encrypted"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: false
+      - type: "editable"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2015-12-04T15:22:30.741Z"
+  lastUpdated: "2015-12-04T21:19:19.790Z"
+  script:
+    scriptContent: "#!/bin/bash\ncd /tmp\n/usr/bin/wget http://wordpress.org/latest.tar.gz\
+      \ --output-document=/tmp/latest.tar.gz\n/bin/tar -xzvf /tmp/latest.tar.gz\n\
+      mv /tmp/wordpress/* /var/www/html/"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"
+- createdDate: "2015-12-04T15:22:30.742Z"
+  lastUpdated: "2015-12-04T21:19:19.790Z"
+  script:
+    scriptContent: "#!/bin/bash\ncp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php\n\
+      /bin/sed -i \"s/database_name_here/$WP_DB_NAME/g\" /var/www/html/wp-config.php\n\
+      /bin/sed -i \"s/username_here/$WP_DB_USER/g\" /var/www/html/wp-config.php\n\
+      /bin/sed -i \"s/password_here/$WP_DB_PASSWORD/g\" /var/www/html/wp-config.php\n\
+      /bin/sed -i \"s/localhost/$WP_DB_HOST/g\" /var/www/html/wp-config.php"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "CONFIGURE"
+    label: "Configure"

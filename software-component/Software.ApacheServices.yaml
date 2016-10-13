@@ -1,0 +1,45 @@
+'@type': "SoftwareComponentType"
+createdDate: "2015-12-04T15:22:30.227Z"
+lastUpdated: "2015-12-04T15:22:30.366Z"
+id: "Software.ApacheServices"
+name: "Apache Services"
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "host"
+    label: ""
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.iaas.blueprint.service"
+      classId: "Infrastructure.Machine.Schema"
+      label: "Machine"
+    state:
+      dependencies: []
+      facets:
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2015-12-04T15:22:30.227Z"
+  lastUpdated: "2015-12-04T15:22:30.227Z"
+  script:
+    scriptContent: "#!/bin/bash\n/usr/bin/yum install httpd -y\n/sbin/chkconfig httpd\
+      \ on\n/sbin/service httpd start"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"

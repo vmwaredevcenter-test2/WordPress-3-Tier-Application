@@ -1,0 +1,89 @@
+'@type': "SoftwareComponentType"
+createdDate: "2015-12-04T15:22:29.941Z"
+lastUpdated: "2015-12-07T15:10:58.809Z"
+id: "Software.WordpressDatabase"
+name: "Wordpress Database"
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "dbpassword"
+    label: "dbpassword"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "secureString"
+            value: "gogo123"
+      - type: "encrypted"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+    isMultiValued: false
+  - id: "host"
+    label: "Container"
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.component.software.service"
+      classId: "softwareResourceType"
+      typeFilter: "Software.MySQL"
+      label: "MySQL"
+    state:
+      dependencies: []
+      facets:
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+  - id: "dbuser"
+    label: "dbuser"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "string"
+            value: "root"
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2015-12-04T15:22:29.942Z"
+  lastUpdated: "2015-12-07T15:10:58.809Z"
+  script:
+    scriptContent: "#!/bin/bash\n/usr/bin/mysql -e \"CREATE DATABASE wordpress;\"\
+      \ --user=$dbuser --password=$dbpassword\n/usr/bin/mysql -e \"CREATE USER 'wordpressuser'@'%';\"\
+      \ --user=$dbuser --password=$dbpassword\n/usr/bin/mysql -e \"SET PASSWORD FOR\
+      \ 'wordpressuser'@'%'=PASSWORD('$dbpassword');\" --user=$dbuser --password=$dbpassword\n\
+      /usr/bin/mysql -e \"GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpressuser'@'%'IDENTIFIED\
+      \ BY '$dbpassword';\" --user=$dbuser --password=$dbpassword\n/usr/bin/mysql\
+      \ -e \"FLUSH PRIVILEGES;\" --user=$dbuser --password=$dbpassword"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"

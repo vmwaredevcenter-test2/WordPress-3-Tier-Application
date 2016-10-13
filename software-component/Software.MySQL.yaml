@@ -1,0 +1,78 @@
+'@type': "SoftwareComponentType"
+createdDate: "2015-12-03T20:27:15.565Z"
+lastUpdated: "2015-12-07T15:09:52.722Z"
+id: "Software.MySQL"
+name: "MySQL"
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "dbpassword"
+    label: "dbpassword"
+    description: "Password"
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "secureString"
+            value: "gogo123"
+      - type: "encrypted"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+    isMultiValued: false
+  - id: "host"
+    label: ""
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.iaas.blueprint.service"
+      classId: "Infrastructure.Machine.Schema"
+      label: "Machine"
+    state:
+      dependencies: []
+      facets:
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2015-12-03T20:27:15.566Z"
+  lastUpdated: "2015-12-07T15:09:52.722Z"
+  script:
+    scriptContent: "#!/bin/bash\n/usr/bin/yum install mysql-server mysql-client -y\n\
+      /sbin/chkconfig mysqld on\n/sbin/service mysqld start"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"
+- createdDate: "2015-12-03T20:27:15.566Z"
+  lastUpdated: "2015-12-07T15:09:52.722Z"
+  script:
+    scriptContent: "#!/bin/bash\n/usr/bin/mysql -e \"UPDATE mysql.user SET Password=PASSWORD('$dbpassword')\
+      \ WHERE User='root';\"\n/usr/bin/mysql -e \"DELETE FROM mysql.user WHERE User='';\"\
+      \n/usr/bin/mysql -e \"DROP DATABASE test;\"\n/usr/bin/mysql -e \"FLUSH PRIVILEGES;\""
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "CONFIGURE"
+    label: "Configure"
